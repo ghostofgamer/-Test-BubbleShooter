@@ -6,10 +6,10 @@ public class WallScaler : MonoBehaviour
     public float thickness = 0.5f;
     public bool _leftWall;
 
-    void Start()
+    /*void Start()
     {
         Resize();
-    }
+    }*/
 
     void Resize()
     {
