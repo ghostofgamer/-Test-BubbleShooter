@@ -109,7 +109,6 @@ public class BallMover : MonoBehaviour
                     TriggerBounceEffect(otherObj);
                     OnBallShotThrough?.Invoke(_ball, hitCell);
                     isFlying = false;
-                    gameObject.SetActive(false);
                     return;
                 }
                 else

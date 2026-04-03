@@ -64,10 +64,11 @@ public class GameManager : MonoBehaviour
     public void OnBallShotThrough(Ball ball, Vector2Int targetCell)
     {
         _gridManager.RemoveBall(targetCell);
-        DestroyBall(ball.gameObject);
-
+        _gridManager.AddBall(targetCell, ball.gameObject);
+        
+        ball.transform.position = _gridManager.GetWorldPosition(targetCell.x, targetCell.y);
+        
         CheckWinCondition();
-
         Invoke("SpawnNewBallDelayed", 0.3f);
     }
 
