@@ -62,8 +62,6 @@ public class BallMover : MonoBehaviour
 
     private void Move()
     {
-        velocity.y -= gravity * Time.deltaTime;
-        
         Vector3 pos = transform.position + velocity * Time.deltaTime;
 
         if (pos.x - _ball.Radius <= left || pos.x + _ball.Radius >= right)

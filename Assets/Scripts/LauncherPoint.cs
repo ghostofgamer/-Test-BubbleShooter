@@ -187,7 +187,8 @@ public class LauncherPoint : MonoBehaviour
             launchVector.normalized,
             currentForce,
             _currentBall.Radius,
-            spread
+            spread,
+            shotType == ShotType.PowerShot
         );
     }
 
@@ -204,7 +205,7 @@ public class LauncherPoint : MonoBehaviour
         float pullAmount = _dragVector.magnitude;
         float pullRatio = pullAmount / maxDragDistance;
         
-        float launchForce = Mathf.Lerp(minForceMultiplier * pullAmount, forceMultiplier * pullAmount, pullRatio);
+        float launchForce = Mathf.Max(forceMultiplier * pullAmount, 20f);
         Vector3 launchVelocity = -_dragVector.normalized * launchForce;
 
         ShotType shotType = (pullRatio >= 0.95f) ? ShotType.PowerShot : ShotType.Normal;
