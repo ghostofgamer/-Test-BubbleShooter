@@ -1711,7 +1711,7 @@ MonoBehaviour:
   _ballPool: {fileID: 3839691}
   ballHolder: {fileID: 339875677}
   _gridManager: {fileID: 833707900}
-  _powerText: {fileID: 0}
+  _powerText: {fileID: 403708400}
   _minAngle: 30
   _maxAngle: 150
 --- !u!114 &1938188866
