@@ -86,6 +86,8 @@ public class BallMover : MonoBehaviour
 
     private void CheckCollision()
     {
+        if (_grid == null) return;
+        
         foreach (var kvp in _grid.GetAllBalls())
         {
             GameObject otherObj = kvp.Value;
@@ -98,6 +100,8 @@ public class BallMover : MonoBehaviour
 
             if (dist <= _ball.Radius + other.Radius)
             {
+                Debug.Log($"Collision! My type: {_ball.GetBallType()}, Other type: {other.GetBallType()}");
+                
                 if (_shotType == ShotType.PowerShot && !_hasPenetrated)
                 {
                     _hasPenetrated = true;
@@ -136,8 +140,6 @@ public class BallMover : MonoBehaviour
 
         Vector2Int bestCell = _grid.GetClosestFreeCell(hitPos);
         Vector2 worldPos = _grid.GetWorldPosition(bestCell.x, bestCell.y);
-
-        _grid.AddBall(bestCell, gameObject);
 
         transform.DOMove(worldPos, 0.2f).SetEase(Ease.OutQuad).OnComplete(() =>
         {

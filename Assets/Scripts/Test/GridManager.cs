@@ -128,6 +128,11 @@ public class GridManager : MonoBehaviour
     {
         if (grid.ContainsKey(pos))
         {
+            GameObject ball = grid[pos];
+            if (ball != null)
+            {
+                Destroy(ball);
+            }
             grid.Remove(pos);
         }
     }

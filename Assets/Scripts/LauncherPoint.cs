@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using InitializationContent;
 using UnityEngine;
+using TMPro;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -46,6 +47,7 @@ public class LauncherPoint : MonoBehaviour
     [SerializeField] private BallPool _ballPool;
     [SerializeField] private Transform ballHolder;
     [SerializeField] private GridManager _gridManager;
+    [SerializeField] private TMP_Text _powerText;
 
     private Ball _currentBall;
     private BallMover _ballMover;
@@ -163,6 +165,12 @@ public class LauncherPoint : MonoBehaviour
         float pullAmount = _dragVector.magnitude;
         float pullRatio = pullAmount / maxDragDistance;
         
+        if (_powerText != null)
+        {
+            int percent = Mathf.RoundToInt(pullRatio * 100);
+            _powerText.text = $"{percent}%";
+        }
+        
         float currentForce = Mathf.Lerp(minForceMultiplier * pullAmount, forceMultiplier * pullAmount, pullRatio);
 
         ShotType shotType = ShotType.Normal;
@@ -187,6 +195,10 @@ public class LauncherPoint : MonoBehaviour
     {
         _isDragging = false;
         _isFlying = true;
+        
+        if (_powerText != null)
+            _powerText.text = "";
+            
         _currentBall.transform.SetParent(null, true);
 
         float pullAmount = _dragVector.magnitude;

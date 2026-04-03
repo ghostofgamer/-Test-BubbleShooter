@@ -202,11 +202,7 @@ public class GameManager : MonoBehaviour
     {
         if (ball != null)
         {
-            Ball ballComponent = ball.GetComponent<Ball>();
-            if (ballComponent != null)
-            {
-                _ballPool.Release(ballComponent);
-            }
+            Destroy(ball);
         }
     }
 
