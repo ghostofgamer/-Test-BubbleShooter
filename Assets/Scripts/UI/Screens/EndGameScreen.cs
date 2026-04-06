@@ -1,3 +1,4 @@
+using BallContent;
 using ScoreContent;
 using TMPro;
 using UnityEngine;
@@ -12,6 +13,14 @@ namespace UI.Screens
         [SerializeField] private TMP_Text _currentScoreText;
         [SerializeField] private TMP_Text _recordScoreText;
 
+        private BallLauncher _ballLauncher;
+        
+        public void Init(BallLauncher ballLauncher)
+        {
+            _ballLauncher = ballLauncher;
+            _ballLauncher.AllBallUsed += ShowDefeatScreen;
+        }
+        
         public override void OpenScreen()
         {
             base.OpenScreen();
@@ -28,9 +37,23 @@ namespace UI.Screens
             }
         }
 
-        public void SetLabelText(string labelText)
+        private void ShowVictoryScreen()
         {
-            _label.text = labelText;
+            _label.text = "Victory!";
+
+            OpenScreen();
+        }
+
+        private void ShowDefeatScreen()
+        {
+            _label.text = "Defeat!";
+            OpenScreen();
+        }
+        
+        private void OnDestroy()
+        {
+            if (_ballLauncher != null)
+                _ballLauncher.AllBallUsed -= ShowDefeatScreen;
         }
     }
 }

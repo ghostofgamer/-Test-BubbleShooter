@@ -1,6 +1,7 @@
 using BallContent;
 using Cysharp.Threading.Tasks;
 using ScoreContent;
+using UI.Screens;
 using UnityEngine;
 
 namespace InitializationContent
@@ -17,6 +18,7 @@ namespace InitializationContent
         [SerializeField] private GameManager _gameManager;
         [SerializeField]private BallLauncher _ballLauncher;
         [SerializeField]private ScoreViewer _scoreViewer;
+        [SerializeField]private EndGameScreen _endGameScreen;
 
         private ScreenData _screenData;
 
@@ -40,10 +42,18 @@ namespace InitializationContent
             
             await _gameManager.Init(_screenData, _gridManager, _ballPool);
             _gameManager.ConnectLauncher(_launcherPoint);
-            _ballLauncher.Initialize();
+            _ballLauncher.Initialize(3);
             _ballLauncher.SpawnCurrentBall();
             
+            _gameManager.SetBallLauncher(_ballLauncher);
+            _ballLauncher.AllBallUsed += OnAllBallsUsed;
+            _endGameScreen.Init(_ballLauncher);
             // _gameManager.SpawnNewBall();
+        }
+        
+        private void OnAllBallsUsed()
+        {
+            Debug.Log("Game Over - All balls used");
         }
     }
 }

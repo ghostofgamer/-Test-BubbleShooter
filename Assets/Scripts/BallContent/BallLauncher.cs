@@ -11,7 +11,8 @@ namespace BallContent
         [SerializeField] private LauncherPoint _launcherPoint;
         [SerializeField] private Image _nextBallImage;
         [SerializeField] private TMP_Text _nextBallText;
-        [SerializeField] private int _maxBalls;
+        
+         private int _maxBalls;
 
         private int _ballsUsed = 0;
         private Ball _currentBall;
@@ -22,9 +23,13 @@ namespace BallContent
         public bool CanShoot => _ballsUsed < _maxBalls;
         public int RemainingBalls => _maxBalls - _ballsUsed;
 
-        public void Initialize()
+        public void Initialize(int maxBalls)
         {
+            _maxBalls = maxBalls;
+            _ballsUsed = 0;
+            _currentBall = _ballPool.Get();
             _nextBall = _ballPool.Get();
+            
             UpdateNextPreview();
         }
 
@@ -33,12 +38,16 @@ namespace BallContent
             if (!CanShoot)
             {
                 AllBallUsed?.Invoke();
-                Debug.Log("AllBallUsed");
                 return;
             }
 
             _currentBall = _nextBall;
-            _nextBall = _ballPool.Get();
+            _nextBall = null;
+
+            if (_ballsUsed < _maxBalls - 1)
+            {
+                _nextBall = _ballPool.Get();
+            }
 
             _launcherPoint.SetBall(_currentBall);
             _ballsUsed++;
@@ -48,9 +57,13 @@ namespace BallContent
 
         private void UpdateNextPreview()
         {
-            if (_nextBall != null)
+            if (_nextBall != null && _nextBall.gameObject.activeSelf)
             {
                 _nextBallImage.color = _nextBall.GetComponent<SpriteRenderer>().color;
+            }
+            else
+            {
+                _nextBallImage.color = Color.clear;
             }
             _nextBallText.text = RemainingBalls.ToString();
         }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using BallContent;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using InitializationContent;
@@ -9,21 +10,26 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
-    [Header("References")]
-    [SerializeField] private GridManager _gridManager;
+    [Header("References")] [SerializeField]
+    private GridManager _gridManager;
+
     [SerializeField] private BallPool _ballPool;
     [SerializeField] private LauncherPoint _launcherPoint;
+    private BallLauncher _ballLauncher;
 
-    [Header("Game Settings")]
-    [SerializeField] private int _totalBalls = 30;
-    [SerializeField] private int _minBallsForWin = 3;
+    [Header("Game Settings")] [SerializeField]
+    private int _minBallsForWin = 3;
 
-    private int _ballsUsed = 0;
     private bool _isGameOver = false;
 
     private void Awake()
     {
         if (Instance == null) Instance = this;
+    }
+
+    public void SetBallLauncher(BallLauncher launcher)
+    {
+        _ballLauncher = launcher;
     }
 
     public async UniTask Init(ScreenData screenData, GridManager grid, BallPool pool)
@@ -34,23 +40,10 @@ public class GameManager : MonoBehaviour
         await UniTask.Delay(500);
     }
 
-    public void SpawnNewBall()
+    public void SpawnNextBall()
     {
         if (_isGameOver) return;
-
-        if (_ballsUsed >= _totalBalls)
-        {
-            Debug.Log("LOSE - No balls left");
-            return;
-        }
-
-        Ball ball = _ballPool.Get();
-        ball.gameObject.SetActive(true);
-        ball.transform.position = _launcherPoint.transform.position;
-
-        _launcherPoint.SetBall(ball);
-        
-        _ballsUsed++;
+        _ballLauncher?.SpawnCurrentBall();
     }
 
     public void OnBallPlaced(Ball ball)
@@ -65,18 +58,18 @@ public class GameManager : MonoBehaviour
     {
         _gridManager.RemoveBall(targetCell);
         _gridManager.AddBall(targetCell, ball.gameObject);
-        
+
         ball.transform.position = _gridManager.GetWorldPosition(targetCell.x, targetCell.y);
-        
+
         CheckWinCondition();
-        Invoke("SpawnNewBallDelayed", 0.3f);
+        Invoke("SpawnNextBallDelayed", 0.3f);
     }
 
     private void CheckMatches(Ball ball, Vector2Int cell)
     {
         string ballType = ball.GetBallType();
         Debug.Log($"CheckMatches: ballType={ballType}, cell={cell}");
-        
+
         List<Vector2Int> matchingCells = FindConnectedBalls(cell, ballType);
         Debug.Log($"Found {matchingCells.Count} matching balls");
 
@@ -96,13 +89,13 @@ public class GameManager : MonoBehaviour
         }
 
         CheckWinCondition();
-        
-        Invoke("SpawnNewBallDelayed", 0.3f);
+
+        Invoke("SpawnNextBallDelayed", 0.3f);
     }
 
-    private void SpawnNewBallDelayed()
+    private void SpawnNextBallDelayed()
     {
-        SpawnNewBall();
+        SpawnNextBall();
     }
 
     private List<Vector2Int> FindConnectedBalls(Vector2Int startCell, string ballType)
@@ -222,8 +215,9 @@ public class GameManager : MonoBehaviour
                     DestroyBall(ballObj);
                 }
             }
+
             _gridManager.ClearAll();
-            
+
             _isGameOver = true;
             Debug.Log("WIN!");
         }
