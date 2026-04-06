@@ -8,7 +8,7 @@ namespace UI.Screens
     public class EndGameScreen : AbstractScreen
     {
         [SerializeField] private TMP_Text _label;
-        [SerializeField]private Image _backgroundImage; 
+        [SerializeField] private Image _backgroundImage;
         [SerializeField] private TMP_Text _currentScoreText;
         [SerializeField] private TMP_Text _recordScoreText;
 

@@ -9,18 +9,14 @@ namespace ScoreContent
 
         [SerializeField] private TMP_Text _scoreCurrentText;
 
-        private void OnEnable()
-        {
-            ScoreManager.Instance.ScoreChanged += UpdateUI;
-        }
-
         private void OnDisable()
         {
             ScoreManager.Instance.ScoreChanged -= UpdateUI;
         }
 
-        private void Start()
+        public void Init()
         {
+            ScoreManager.Instance.ScoreChanged += UpdateUI;
             UpdateUI(0);
         }
 

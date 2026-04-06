@@ -1,4 +1,6 @@
+using BallContent;
 using Cysharp.Threading.Tasks;
+using ScoreContent;
 using UnityEngine;
 
 namespace InitializationContent
@@ -13,6 +15,8 @@ namespace InitializationContent
         [SerializeField] private LauncherVisualizer _launcherVisualizer;
         [SerializeField] private LauncherPoint _launcherPoint;
         [SerializeField] private GameManager _gameManager;
+        [SerializeField]private BallLauncher _ballLauncher;
+        [SerializeField]private ScoreViewer _scoreViewer;
 
         private ScreenData _screenData;
 
@@ -25,7 +29,7 @@ namespace InitializationContent
         {
             _screenData = new ScreenData(_camera);
             Debug.Log("Init ScreenData: Width=" + _screenData.Width + " Height=" + _screenData.Height);
-            
+            _scoreViewer.Init();
             await _playFieldSpawner.Init(_screenData.Height, _screenData.Width);
             _gridManager.CalculateRadius(_screenData.Width, _screenData.Height);
             await _ballPool.Init(_gridManager.Radius);
@@ -36,7 +40,10 @@ namespace InitializationContent
             
             await _gameManager.Init(_screenData, _gridManager, _ballPool);
             _gameManager.ConnectLauncher(_launcherPoint);
-            _gameManager.SpawnNewBall();
+            _ballLauncher.Initialize();
+            _ballLauncher.SpawnCurrentBall();
+            
+            // _gameManager.SpawnNewBall();
         }
     }
 }

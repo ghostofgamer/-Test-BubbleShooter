@@ -20,6 +20,7 @@ public class Ball : MonoBehaviour
     public void Init(string type)
     {
         _ballType = type;
+        
         if (_sr != null && _ballColorConfig != null)
         {
             _sr.color = _ballColorConfig.GetColor(type);
