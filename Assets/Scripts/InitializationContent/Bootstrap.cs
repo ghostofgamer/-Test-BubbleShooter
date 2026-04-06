@@ -42,13 +42,12 @@ namespace InitializationContent
             
             await _gameManager.Init(_screenData, _gridManager, _ballPool);
             _gameManager.ConnectLauncher(_launcherPoint);
-            _ballLauncher.Initialize(3);
+            _ballLauncher.Initialize(30);
             _ballLauncher.SpawnCurrentBall();
             
             _gameManager.SetBallLauncher(_ballLauncher);
             _ballLauncher.AllBallUsed += OnAllBallsUsed;
             _endGameScreen.Init(_ballLauncher);
-            // _gameManager.SpawnNewBall();
         }
         
         private void OnAllBallsUsed()

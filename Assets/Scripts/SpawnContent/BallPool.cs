@@ -13,7 +13,7 @@ public class BallPool : MonoBehaviour
     private List<Ball> _pool;
     private float _ballSpriteSize;
     private float _radius;
-    private string[] _ballTypes = { "R", "G", "B" };
+    private string[] _ballTypes = { "R", "G", "B","Y"};
 
     public async UniTask Init(float radius)
     {

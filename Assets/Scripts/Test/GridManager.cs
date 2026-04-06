@@ -272,4 +272,17 @@ public class GridManager : MonoBehaviour
         }
         grid.Clear();
     }
+
+    public int GetMaxRowWithBalls()
+    {
+        int maxRow = -1;
+        
+        foreach (var cell in grid.Keys)
+        {
+            if (cell.y > maxRow)
+                maxRow = cell.y;
+        }
+        
+        return maxRow;
+    }
 }

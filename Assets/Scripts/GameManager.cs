@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using BallContent;
 using Cysharp.Threading.Tasks;
@@ -21,6 +22,8 @@ public class GameManager : MonoBehaviour
     private int _minBallsForWin = 3;
 
     private bool _isGameOver = false;
+
+    public event Action VictoryGame;
 
     private void Awake()
     {
@@ -68,13 +71,15 @@ public class GameManager : MonoBehaviour
     private void CheckMatches(Ball ball, Vector2Int cell)
     {
         string ballType = ball.GetBallType();
-        Debug.Log($"CheckMatches: ballType={ballType}, cell={cell}");
-
+        
+        // Найти все шары того же цвета connected к этому
         List<Vector2Int> matchingCells = FindConnectedBalls(cell, ballType);
-        Debug.Log($"Found {matchingCells.Count} matching balls");
 
+        // Если 3+ шара одного цвета - уничтожить
         if (matchingCells.Count >= 3)
         {
+            Debug.Log("3+ шара одного цвета - уничтожить " + ballType);
+            
             foreach (var matchCell in matchingCells)
             {
                 GameObject ballObj = _gridManager.GetBall(matchCell);
@@ -84,11 +89,13 @@ public class GameManager : MonoBehaviour
                     _gridManager.RemoveBall(matchCell);
                 }
             }
-
+            
+            // Удалить висячие шары
             RemoveFloatingBalls();
+            
+            // Проверить победу
+            CheckWinCondition();
         }
-
-        CheckWinCondition();
 
         Invoke("SpawnNextBallDelayed", 0.3f);
     }
@@ -141,8 +148,11 @@ public class GameManager : MonoBehaviour
             if (!connectedToCeiling.Contains(cell))
             {
                 GameObject ballObj = _gridManager.GetBall(cell);
+                
                 if (ballObj != null)
                 {
+                    Debug.Log("УдалЯем висящий шар ");
+                    
                     _gridManager.RemoveBall(cell);
                     DestroyBall(ballObj);
                 }
@@ -203,24 +213,74 @@ public class GameManager : MonoBehaviour
     private void CheckWinCondition()
     {
         int totalBalls = _gridManager.GetAllOccupiedCells().Count;
+        
+        Debug.Log("CheckWinCondition totalBalls" + totalBalls);
+        
         if (totalBalls <= _minBallsForWin && totalBalls > 0)
         {
-            List<Vector2Int> remaining = _gridManager.GetAllOccupiedCells();
-            foreach (var cell in remaining)
-            {
-                GameObject ballObj = _gridManager.GetBall(cell);
-                if (ballObj != null)
-                {
-                    _gridManager.RemoveBall(cell);
-                    DestroyBall(ballObj);
-                }
-            }
-
-            _gridManager.ClearAll();
-
-            _isGameOver = true;
-            Debug.Log("WIN!");
+            Debug.Log("totalBalls <= _minBallsForWin && totalBalls > 0    Victory");
+            Victory();
+            return;
         }
+        
+        if (IsLastRowNearlyEmpty())
+        {
+            Debug.Log("IsLastRowNearlyEmpty Victory");
+            Victory();
+        }
+    }
+
+    private bool IsLastRowNearlyEmpty()
+    {
+        int maxRow = _gridManager.GetMaxRowWithBalls();
+        if (maxRow < 0) return false;
+        
+        int ballsInLastRow = 0;
+        
+        for (int x = 0; x < _gridManager.Cols; x++)
+        {
+            /*if (_gridManager.IsCellOccupied(new Vector2Int(x, maxRow)))
+            {
+                Debug.Log($"!!!!!!!!!new Vector2Int(x, maxRow) {new Vector2Int(x, maxRow)}");
+                ballsInLastRow++;
+            }*/
+            
+            if (_gridManager.IsCellOccupied(new Vector2Int(x, 0)))
+            {
+                Debug.Log($"!!!!!!!!!new Vector2Int(x, maxRow) {new Vector2Int(x, 0)}");
+                ballsInLastRow++;
+            }
+            
+            // Debug.Log($"new Vector2Int(x, maxRow) {new Vector2Int(x, maxRow)}");
+        }
+        
+        
+        
+        int maxPossibleInRow = _gridManager.Cols;
+        float percentage = (float)ballsInLastRow / maxPossibleInRow;
+        
+        Debug.Log($"Last row: {ballsInLastRow}/{maxPossibleInRow} = {percentage * 100}%");
+        
+        return percentage < 0.3f;
+    }
+
+    private void Victory()
+    {
+        List<Vector2Int> remaining = _gridManager.GetAllOccupiedCells();
+        foreach (var cell in remaining)
+        {
+            GameObject ballObj = _gridManager.GetBall(cell);
+            if (ballObj != null)
+            {
+                _gridManager.RemoveBall(cell);
+                DestroyBall(ballObj);
+            }
+        }
+
+        _gridManager.ClearAll();
+        _isGameOver = true;
+        VictoryGame?.Invoke();
+        Debug.Log("WIN!");
     }
 
     public void ConnectLauncher(LauncherPoint launcher)
