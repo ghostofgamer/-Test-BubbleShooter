@@ -37,7 +37,7 @@ namespace UI.Screens
             else
             {
                 _currentScoreText.text = $"Score: {ScoreManager.Instance.CurrentScore.ToString()}";
-                _recordScoreText.text = $"Record: {ScoreManager.Instance.CurrentScore.ToString()}";
+                _recordScoreText.text = $"Record: {ScoreManager.Instance.RecordScore.ToString()}";
             }
         }
 

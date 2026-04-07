@@ -21,6 +21,24 @@ namespace ScoreContent
 
             RecordScore = PlayerPrefs.GetInt(RecordScoreName, 0);
         }
+        
+        public void AddMatchScore(int ballsCount)
+        {
+            int points = ballsCount * 10;
+            
+            if (ballsCount > 3)
+            {
+                points += (ballsCount - 3) * 5; // +5 за каждый шар сверх 3
+            }
+            
+            AddScore(points);
+        }
+        
+        public void AddFallingBallsScore(int ballsCount)
+        {
+            int points = ballsCount * 15; // Чуть больше за упавшие
+            AddScore(points);
+        }
 
         public void AddScore(int points)
         {

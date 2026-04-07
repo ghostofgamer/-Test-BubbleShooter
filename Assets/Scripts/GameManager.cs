@@ -4,6 +4,7 @@ using BallContent;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using InitializationContent;
+using ScoreContent;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -90,6 +91,8 @@ public class GameManager : MonoBehaviour
                 }
             }
             
+            ScoreManager.Instance.AddMatchScore(matchingCells.Count);
+            
             // Удалить висячие шары
             RemoveFloatingBalls();
             
@@ -140,6 +143,7 @@ public class GameManager : MonoBehaviour
 
     private void RemoveFloatingBalls()
     {
+        int floatingBallsCount = 0;
         List<Vector2Int> connectedToCeiling = GetBallsConnectedToCeiling();
         List<Vector2Int> allBalls = _gridManager.GetAllOccupiedCells();
 
@@ -152,12 +156,14 @@ public class GameManager : MonoBehaviour
                 if (ballObj != null)
                 {
                     Debug.Log("УдалЯем висящий шар ");
-                    
+                    floatingBallsCount++;
                     _gridManager.RemoveBall(cell);
                     DestroyBall(ballObj);
                 }
             }
         }
+        
+        ScoreManager.Instance.AddFallingBallsScore(floatingBallsCount);
     }
 
     private List<Vector2Int> GetBallsConnectedToCeiling()

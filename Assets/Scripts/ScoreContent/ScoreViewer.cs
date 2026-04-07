@@ -5,8 +5,6 @@ namespace ScoreContent
 {
     public class ScoreViewer : MonoBehaviour
     {
-        private const string RecordScore = "RecordScore";
-
         [SerializeField] private TMP_Text _scoreCurrentText;
 
         private void OnDisable()

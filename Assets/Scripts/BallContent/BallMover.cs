@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using DG.Tweening;
 using InitializationContent;
 using UnityEngine;
@@ -105,13 +106,15 @@ public class BallMover : MonoBehaviour
                     _hasPenetrated = true;
                     Vector2Int hitCell = _grid.GetCellFromWorldPosition(other.transform.position);
                     TriggerBounceEffect(otherObj);
+                    // TriggerBounceEffect(this.gameObject);
                     OnBallShotThrough?.Invoke(_ball, hitCell);
                     isFlying = false;
                     return;
                 }
                 else
                 {
-                    TriggerBounceEffect(otherObj);
+                    // TriggerBounceEffect(otherObj);
+                    TriggerBounceEffect(this.gameObject);
                     SnapToGrid(transform.position);
                     return;
                 }
@@ -119,7 +122,40 @@ public class BallMover : MonoBehaviour
         }
     }
 
-    private void TriggerBounceEffect(GameObject otherBall)
+    private void TriggerBounceEffect(GameObject hitBall)
+    {
+        if (_grid == null) return;
+    
+        // Находим клетку куда прилип шар
+        Vector2Int hitCell = _grid.GetCellFromWorldPosition(hitBall.transform.position);
+    
+        // Получаем соседей этой клетки (ближайшие 6)
+        List<Vector2Int> neighbors = _grid.GetNeighbors(hitCell);
+    
+        // Дёргаем только соседей
+        foreach (var neighbor in neighbors)
+        {
+            GameObject neighborBall = _grid.GetBall(neighbor);
+            if (neighborBall != null)
+            {
+                AnimateBounce(neighborBall);
+            }
+        }
+    }
+
+    private void AnimateBounce(GameObject ball)
+    {
+        Vector3 originalPos = ball.transform.position;
+        Vector3 direction = (ball.transform.position - transform.position).normalized;
+        Vector3 bouncePos = ball.transform.position + direction * _ball.Radius * 0.3f;
+    
+        ball.transform.DOMove(bouncePos, 0.05f).SetEase(Ease.OutQuad).OnComplete(() =>
+        {
+            ball.transform.DOMove(originalPos, 0.1f).SetEase(Ease.InOutElastic);
+        });
+    }
+    
+    /*private void TriggerBounceEffect(GameObject otherBall)
     {
         Vector3 direction = (otherBall.transform.position - transform.position).normalized;
         Vector3 bouncePos = otherBall.transform.position - direction * _ball.Radius * 1.5f;
@@ -129,7 +165,7 @@ public class BallMover : MonoBehaviour
         {
             otherBall.transform.DOMove(originalPos, 0.15f).SetEase(Ease.InOutElastic);
         });
-    }
+    }*/
 
     public void SnapToGrid(Vector2 hitPos)
     {
