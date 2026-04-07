@@ -94,8 +94,8 @@ public class LauncherPoint : MonoBehaviour
         _ballMover.OnBallShotThrough += OnBallShotThroughHandler;
         
         _isFlying = false;
-        _isDragging = true;
-        _visualizer?.Show();
+        _isDragging = false;
+        _visualizer?.Hide();
     }
 
     private void OnBallPlacedHandler(Ball ball, Vector2Int cell)
@@ -124,16 +124,30 @@ public class LauncherPoint : MonoBehaviour
 
     private void Update()
     {
+        // Зажимаем и тянем
+        if (Input.GetMouseButtonDown(0) && _currentBall != null && !_isFlying)
+        {
+            _isDragging = true;
+        }
+    
+        if (Input.GetMouseButtonUp(0) && _isDragging)
+        {
+            LaunchBall();
+        }
+    
         if (_isDragging && _currentBall != null && !_isFlying)
+            DragBall();
+        
+        /*if (_isDragging && _currentBall != null && !_isFlying)
             DragBall();
 
         if (_isDragging && Input.GetMouseButtonUp(0))
-            LaunchBall();
+            LaunchBall();*/
     }
 
     private void DragBall()
     {
-        Vector3 mousePos = Camera.main.ScreenToWorldPoint(
+        /*Vector3 mousePos = Camera.main.ScreenToWorldPoint(
             new Vector3(Input.mousePosition.x, Input.mousePosition.y, Mathf.Abs(Camera.main.transform.position.z))
         );
         mousePos.z = 0f;
@@ -189,7 +203,72 @@ public class LauncherPoint : MonoBehaviour
             _currentBall.Radius,
             spread,
             shotType == ShotType.PowerShot
-        );
+        );*/
+        
+       
+            Vector3 mousePos = Camera.main.ScreenToWorldPoint(
+                new Vector3(Input.mousePosition.x, Input.mousePosition.y, Mathf.Abs(Camera.main.transform.position.z))
+            );
+            mousePos.z = 0f;
+
+            _dragVector = mousePos - _startPosition;
+
+            // Разрешаем тянуть вниз (положительный Y)
+            // Ограничиваем только по maxDragDistance
+            if (_dragVector.magnitude > maxDragDistance)
+                _dragVector = _dragVector.normalized * maxDragDistance;
+
+            // Разрешаем любое направление вниз
+            // _currentBall.transform.position = _startPosition + _dragVector;
+            
+            
+            Vector3 launchVector = -_dragVector;
+
+            if (launchVector.y <= 0)
+            {
+                launchVector.y = 0.01f;
+                launchVector = launchVector.normalized * _dragVector.magnitude;
+                _dragVector = -launchVector;
+            }
+
+            float angle = Mathf.Atan2(launchVector.y, launchVector.x) * Mathf.Rad2Deg;
+            angle = Mathf.Clamp(angle, _minAngle, _maxAngle);
+
+            float length = launchVector.magnitude;
+            launchVector.x = Mathf.Cos(angle * Mathf.Deg2Rad) * length;
+            launchVector.y = Mathf.Sin(angle * Mathf.Deg2Rad) * length;
+
+            _dragVector = -launchVector;
+            _currentBall.transform.position = _startPosition + _dragVector;
+
+            float pullAmount = _dragVector.magnitude;
+            float pullRatio = pullAmount / maxDragDistance;
+        
+            if (_powerText != null)
+            {
+                int percent = Mathf.RoundToInt(pullRatio * 100);
+                _powerText.text = $"{percent}%";
+            }
+        
+            float currentForce = Mathf.Lerp(minForceMultiplier * pullAmount, forceMultiplier * pullAmount, pullRatio);
+
+            ShotType shotType = ShotType.Normal;
+            float spread = 0f;
+
+            if (pullRatio >= 0.95f)
+            {
+                shotType = ShotType.PowerShot;
+                spread = 15f * pullRatio;
+            }
+
+            _visualizer?.UpdateTrajectory(
+                _currentBall.transform.position,
+                launchVector.normalized,
+                currentForce,
+                _currentBall.Radius,
+                spread,
+                shotType == ShotType.PowerShot);
+
     }
 
     private void LaunchBall()
@@ -205,8 +284,10 @@ public class LauncherPoint : MonoBehaviour
         float pullAmount = _dragVector.magnitude;
         float pullRatio = pullAmount / maxDragDistance;
         
-        float launchForce = Mathf.Max(forceMultiplier * pullAmount, 20f);
+        float launchForce = Mathf.Max(forceMultiplier * pullAmount, 10f);
         Vector3 launchVelocity = -_dragVector.normalized * launchForce;
+        Debug.Log("launchForce " + launchForce);
+        Debug.Log("launchVelocity " + launchVelocity);
 
         ShotType shotType = (pullRatio >= 0.95f) ? ShotType.PowerShot : ShotType.Normal;
 

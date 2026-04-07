@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using InitializationContent;
 using UnityEngine;
@@ -122,7 +123,66 @@ public class BallMover : MonoBehaviour
         }
     }
 
-    private void TriggerBounceEffect(GameObject hitBall)
+    private async UniTask TriggerBounceEffect(GameObject centerBall)
+    {
+        if (_grid == null) return;
+    
+        Vector2Int centerCell = _grid.GetCellFromWorldPosition(centerBall.transform.position);
+    
+        // Первый круг - сильно
+        List<Vector2Int> firstCircle = _grid.GetNeighbors(centerCell);
+        foreach (var cell in firstCircle)
+        {
+            GameObject ball = _grid.GetBall(cell);
+            if (ball != null)
+            {
+                AnimateBounce(ball, 0.25f, 0.08f, centerBall.transform.position);
+            }
+        }
+    
+        // Ждём когда первый круг начнёт возвращаться
+        await UniTask.Delay(80);
+    
+        // Второй круг - слабее, с задержкой
+        List<Vector2Int> secondCircle = new List<Vector2Int>();
+        foreach (var cell in firstCircle)
+        {
+            List<Vector2Int> neighbors = _grid.GetNeighbors(cell);
+            foreach (var n in neighbors)
+            {
+                if (n != centerCell && !firstCircle.Contains(n) && _grid.IsCellOccupied(n))
+                {
+                    secondCircle.Add(n);
+                }
+            }
+        }
+    
+        foreach (var cell in secondCircle)
+        {
+            GameObject ball = _grid.GetBall(cell);
+            if (ball != null)
+            {
+                AnimateBounce(ball, 0.13f, 0.06f, centerBall.transform.position);
+            }
+        }
+    }
+
+    private void AnimateBounce(GameObject ball, float distance, float time, Vector3 centerPos)
+    {
+        Vector3 originalPos = ball.transform.position;
+    
+        // Направление от центра удара к шару
+        Vector3 direction = (ball.transform.position - centerPos).normalized;
+        Vector3 bouncePos = originalPos + direction * distance;
+    
+        ball.transform.DOMove(bouncePos, time).SetEase(Ease.OutQuad).OnComplete(() =>
+        {
+            ball.transform.DOMove(originalPos, time * 1.5f).SetEase(Ease.OutElastic);
+        });
+    }
+    
+    
+    /*private void TriggerBounceEffect(GameObject hitBall)
     {
         if (_grid == null) return;
     
@@ -152,18 +212,6 @@ public class BallMover : MonoBehaviour
         ball.transform.DOMove(bouncePos, 0.05f).SetEase(Ease.OutQuad).OnComplete(() =>
         {
             ball.transform.DOMove(originalPos, 0.1f).SetEase(Ease.InOutElastic);
-        });
-    }
-    
-    /*private void TriggerBounceEffect(GameObject otherBall)
-    {
-        Vector3 direction = (otherBall.transform.position - transform.position).normalized;
-        Vector3 bouncePos = otherBall.transform.position - direction * _ball.Radius * 1.5f;
-        Vector3 originalPos = otherBall.transform.position;
-
-        otherBall.transform.DOMove(bouncePos, 0.1f).SetEase(Ease.OutQuad).OnComplete(() =>
-        {
-            otherBall.transform.DOMove(originalPos, 0.15f).SetEase(Ease.InOutElastic);
         });
     }*/
 

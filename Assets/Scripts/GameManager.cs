@@ -72,6 +72,7 @@ public class GameManager : MonoBehaviour
     private void CheckMatches(Ball ball, Vector2Int cell)
     {
         string ballType = ball.GetBallType();
+        Color ballColor = ball.GetComponent<SpriteRenderer>().color;
         
         // Найти все шары того же цвета connected к этому
         List<Vector2Int> matchingCells = FindConnectedBalls(cell, ballType);
@@ -84,8 +85,11 @@ public class GameManager : MonoBehaviour
             foreach (var matchCell in matchingCells)
             {
                 GameObject ballObj = _gridManager.GetBall(matchCell);
+                
                 if (ballObj != null)
                 {
+                    Color destroyColor = ballObj.GetComponent<SpriteRenderer>().color;
+                    EffectManager.Instance.PlayEffect(ballObj.transform.position, destroyColor);
                     DestroyBall(ballObj);
                     _gridManager.RemoveBall(matchCell);
                 }
