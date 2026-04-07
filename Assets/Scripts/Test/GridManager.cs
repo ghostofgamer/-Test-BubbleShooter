@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using InitializationContent;
+using SpawnContent;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -15,17 +16,17 @@ public class GridManager : MonoBehaviour
     public int Cols => cols;
     public int Rows => rows;
     [SerializeField] private float _offset;
-    
+
     public TextAsset levelFile;
-    
+
     private float width;
     private float height;
     private float _top;
     public event Action GridCompleted;
     private BallPool _ballPool;
-    
+
     public float Radius { get; private set; } = 0.5f;
-    
+
     public async UniTask Init(ScreenData screen, BallPool pool)
     {
         _ballPool = pool;
@@ -34,7 +35,7 @@ public class GridManager : MonoBehaviour
 
         LoadLevel();
     }
-    
+
     public void CalculateRadius(float screenWidth, float screenHeight)
     {
         float padding = 0.9f;
@@ -45,8 +46,8 @@ public class GridManager : MonoBehaviour
 
         rows = Mathf.FloorToInt(screenHeight / height);
     }
-    
-    public  Vector2 GetWorldPosition(int x, int y)
+
+    public Vector2 GetWorldPosition(int x, int y)
     {
         float offsetX = (y % 2 == 0) ? 0 : Radius;
 
@@ -63,7 +64,7 @@ public class GridManager : MonoBehaviour
 
         return new Vector2(worldX, worldY);
     }
-  
+
     void LoadLevel()
     {
         if (levelFile == null || string.IsNullOrEmpty(levelFile.text))
@@ -73,7 +74,7 @@ public class GridManager : MonoBehaviour
         }
 
         string[] lines = levelFile.text.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-        
+
         rows = Mathf.Max(rows, lines.Length);
         cols = Mathf.Max(cols, lines.Length > 0 ? lines[0].Trim().Length : 0);
 
@@ -94,7 +95,7 @@ public class GridManager : MonoBehaviour
             }
         }
     }
-    
+
     void SpawnBall(int x, int y, string type)
     {
         Vector2 pos = GetWorldPosition(x, y);
@@ -124,19 +125,21 @@ public class GridManager : MonoBehaviour
     }
 
     // ❌ удаление
-    public void RemoveBall(Vector2Int pos)
+    public void RemoveBall(Vector2Int pos, bool isDestroy = true)
     {
         if (grid.ContainsKey(pos))
         {
             GameObject ball = grid[pos];
-            if (ball != null)
+
+            if (ball != null && isDestroy)
             {
                 Destroy(ball);
             }
+
             grid.Remove(pos);
         }
     }
-    
+
     void OnDrawGizmos()
     {
         if (!Application.isPlaying) return;
@@ -152,13 +155,13 @@ public class GridManager : MonoBehaviour
                 if (grid.ContainsKey(key))
                     Gizmos.color = Color.green; // занято
                 else
-                    Gizmos.color = Color.red;   // пусто
+                    Gizmos.color = Color.red; // пусто
 
                 Gizmos.DrawWireSphere(pos, Radius * 0.9f);
             }
         }
     }
-    
+
     public Vector2Int GetClosestFreeCell(Vector2 hitPos)
     {
         float minDist = float.MaxValue;
@@ -181,7 +184,7 @@ public class GridManager : MonoBehaviour
 
         return best;
     }
-    
+
     public List<Vector2Int> GetAllCells()
     {
         List<Vector2Int> cells = new();
@@ -196,7 +199,7 @@ public class GridManager : MonoBehaviour
 
         return cells;
     }
-    
+
     public Dictionary<Vector2Int, GameObject> GetAllBalls()
     {
         return grid;
@@ -217,9 +220,12 @@ public class GridManager : MonoBehaviour
         List<Vector2Int> neighbors = new();
         int y = cell.y;
 
-        int[] evenRowOffsets = { new Vector2Int(-1, 0).x, new Vector2Int(1, 0).x, 
-                                  new Vector2Int(0, -1).x, new Vector2Int(0, 1).x,
-                                  new Vector2Int(-1, -1).x, new Vector2Int(-1, 1).x };
+        int[] evenRowOffsets =
+        {
+            new Vector2Int(-1, 0).x, new Vector2Int(1, 0).x,
+            new Vector2Int(0, -1).x, new Vector2Int(0, 1).x,
+            new Vector2Int(-1, -1).x, new Vector2Int(-1, 1).x
+        };
         int[] evenRowOffsetsY = { 0, 0, -1, 1, -1, 1 };
 
         if (y % 2 == 0)
@@ -270,19 +276,20 @@ public class GridManager : MonoBehaviour
         {
             if (kvp.Value != null) Destroy(kvp.Value);
         }
+
         grid.Clear();
     }
 
     public int GetMaxRowWithBalls()
     {
         int maxRow = -1;
-        
+
         foreach (var cell in grid.Keys)
         {
             if (cell.y > maxRow)
                 maxRow = cell.y;
         }
-        
+
         return maxRow;
     }
 }

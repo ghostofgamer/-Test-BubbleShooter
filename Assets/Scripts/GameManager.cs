@@ -5,6 +5,7 @@ using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using InitializationContent;
 using ScoreContent;
+using SpawnContent;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -23,6 +24,7 @@ public class GameManager : MonoBehaviour
     private int _minBallsForWin = 3;
 
     private bool _isGameOver = false;
+    private ScreenData _screenData;
 
     public event Action VictoryGame;
 
@@ -31,9 +33,10 @@ public class GameManager : MonoBehaviour
         if (Instance == null) Instance = this;
     }
 
-    public void SetBallLauncher(BallLauncher launcher)
+    public void Init(BallLauncher launcher, ScreenData screenData)
     {
         _ballLauncher = launcher;
+        _screenData = screenData;
     }
 
     public async UniTask Init(ScreenData screenData, GridManager grid, BallPool pool)
@@ -73,19 +76,17 @@ public class GameManager : MonoBehaviour
     {
         string ballType = ball.GetBallType();
         Color ballColor = ball.GetComponent<SpriteRenderer>().color;
-        
+
         // Найти все шары того же цвета connected к этому
         List<Vector2Int> matchingCells = FindConnectedBalls(cell, ballType);
 
         // Если 3+ шара одного цвета - уничтожить
         if (matchingCells.Count >= 3)
         {
-            Debug.Log("3+ шара одного цвета - уничтожить " + ballType);
-            
             foreach (var matchCell in matchingCells)
             {
                 GameObject ballObj = _gridManager.GetBall(matchCell);
-                
+
                 if (ballObj != null)
                 {
                     Color destroyColor = ballObj.GetComponent<SpriteRenderer>().color;
@@ -94,12 +95,12 @@ public class GameManager : MonoBehaviour
                     _gridManager.RemoveBall(matchCell);
                 }
             }
-            
+
             ScoreManager.Instance.AddMatchScore(matchingCells.Count);
-            
+
             // Удалить висячие шары
             RemoveFloatingBalls();
-            
+
             // Проверить победу
             CheckWinCondition();
         }
@@ -145,7 +146,7 @@ public class GameManager : MonoBehaviour
         return visited;
     }
 
-    private void RemoveFloatingBalls()
+    /*private void RemoveFloatingBalls()
     {
         int floatingBallsCount = 0;
         List<Vector2Int> connectedToCeiling = GetBallsConnectedToCeiling();
@@ -156,7 +157,7 @@ public class GameManager : MonoBehaviour
             if (!connectedToCeiling.Contains(cell))
             {
                 GameObject ballObj = _gridManager.GetBall(cell);
-                
+
                 if (ballObj != null)
                 {
                     Debug.Log("УдалЯем висящий шар ");
@@ -166,8 +167,51 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
-        
+
         ScoreManager.Instance.AddFallingBallsScore(floatingBallsCount);
+    }*/
+
+    private void RemoveFloatingBalls()
+    {
+        List<Vector2Int> connectedToCeiling = GetBallsConnectedToCeiling();
+        List<Vector2Int> allBalls = _gridManager.GetAllOccupiedCells();
+
+        foreach (var cell in allBalls)
+        {
+            if (!connectedToCeiling.Contains(cell))
+            {
+                GameObject ballObj = _gridManager.GetBall(cell);
+                if (ballObj != null)
+                {
+                    _gridManager.RemoveBall(cell,false);
+
+                    // Получаем цвет для эффекта
+                    Color ballColor = ballObj.GetComponent<SpriteRenderer>().color;
+
+                    // Анимируем падение
+                    AnimateFallingBall(ballObj, ballColor);
+                }
+            }
+        }
+    }
+
+    private void AnimateFallingBall(GameObject ball, Color ballColor)
+    {
+        // Позиция внизу экрана + оффсет вверх
+        Vector3 targetPos = new Vector3(ball.transform.position.x, _screenData.Bottom + 1f, ball.transform.position.z);
+
+        float fallTime = Vector3.Distance(ball.transform.position, targetPos) / 8f;
+
+        ball.transform.DOMove(targetPos, fallTime).SetEase(Ease.InQuad).OnComplete(() =>
+        {
+            Debug.Log("Falling Effect Bum");
+        
+            // Эффект чуть выше низа экрана
+            EffectManager.Instance.PlayEffect(targetPos, ballColor);
+
+            // Возвращаем в пул
+            DestroyBall(ball);
+        });
     }
 
     private List<Vector2Int> GetBallsConnectedToCeiling()
@@ -216,26 +260,27 @@ public class GameManager : MonoBehaviour
     {
         if (ball != null)
         {
-            Destroy(ball);
+            Ball ballComponent = ball.GetComponent<Ball>();
+
+            if (ballComponent != null)
+            {
+                _ballPool.Release(ballComponent);
+            }
         }
     }
 
     private void CheckWinCondition()
     {
         int totalBalls = _gridManager.GetAllOccupiedCells().Count;
-        
-        Debug.Log("CheckWinCondition totalBalls" + totalBalls);
-        
+
         if (totalBalls <= _minBallsForWin && totalBalls > 0)
         {
-            Debug.Log("totalBalls <= _minBallsForWin && totalBalls > 0    Victory");
             Victory();
             return;
         }
-        
+
         if (IsLastRowNearlyEmpty())
         {
-            Debug.Log("IsLastRowNearlyEmpty Victory");
             Victory();
         }
     }
@@ -244,33 +289,19 @@ public class GameManager : MonoBehaviour
     {
         int maxRow = _gridManager.GetMaxRowWithBalls();
         if (maxRow < 0) return false;
-        
+
         int ballsInLastRow = 0;
-        
+
         for (int x = 0; x < _gridManager.Cols; x++)
         {
-            /*if (_gridManager.IsCellOccupied(new Vector2Int(x, maxRow)))
-            {
-                Debug.Log($"!!!!!!!!!new Vector2Int(x, maxRow) {new Vector2Int(x, maxRow)}");
-                ballsInLastRow++;
-            }*/
-            
             if (_gridManager.IsCellOccupied(new Vector2Int(x, 0)))
-            {
-                Debug.Log($"!!!!!!!!!new Vector2Int(x, maxRow) {new Vector2Int(x, 0)}");
                 ballsInLastRow++;
-            }
-            
-            // Debug.Log($"new Vector2Int(x, maxRow) {new Vector2Int(x, maxRow)}");
         }
-        
-        
-        
+
+
         int maxPossibleInRow = _gridManager.Cols;
         float percentage = (float)ballsInLastRow / maxPossibleInRow;
-        
-        Debug.Log($"Last row: {ballsInLastRow}/{maxPossibleInRow} = {percentage * 100}%");
-        
+
         return percentage < 0.3f;
     }
 

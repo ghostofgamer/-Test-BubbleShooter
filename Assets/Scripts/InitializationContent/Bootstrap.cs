@@ -1,6 +1,7 @@
 using BallContent;
 using Cysharp.Threading.Tasks;
 using ScoreContent;
+using SpawnContent;
 using UI.Screens;
 using UnityEngine;
 
@@ -30,7 +31,6 @@ namespace InitializationContent
         private async UniTask Initialization()
         {
             _screenData = new ScreenData(_camera);
-            Debug.Log("Init ScreenData: Width=" + _screenData.Width + " Height=" + _screenData.Height);
             _scoreViewer.Init();
             await _playFieldSpawner.Init(_screenData.Height, _screenData.Width);
             _gridManager.CalculateRadius(_screenData.Width, _screenData.Height);
@@ -42,10 +42,10 @@ namespace InitializationContent
             
             await _gameManager.Init(_screenData, _gridManager, _ballPool);
             _gameManager.ConnectLauncher(_launcherPoint);
-            _ballLauncher.Initialize(10);
+            _ballLauncher.Initialize(30);
             _ballLauncher.SpawnCurrentBall();
             
-            _gameManager.SetBallLauncher(_ballLauncher);
+            _gameManager.Init(_ballLauncher,_screenData);
             _ballLauncher.AllBallUsed += OnAllBallsUsed;
             _endGameScreen.Init(_ballLauncher);
         }

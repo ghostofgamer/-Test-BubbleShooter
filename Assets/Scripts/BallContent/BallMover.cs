@@ -100,8 +100,6 @@ public class BallMover : MonoBehaviour
 
             if (dist <= _ball.Radius + other.Radius)
             {
-                Debug.Log($"Collision! My type: {_ball.GetBallType()}, Other type: {other.GetBallType()}");
-                
                 if (_shotType == ShotType.PowerShot && !_hasPenetrated)
                 {
                     _hasPenetrated = true;
