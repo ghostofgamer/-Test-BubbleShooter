@@ -2261,7 +2261,7 @@ LineRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1938188862}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -2396,16 +2396,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a53259f0ddbaeb743939df0fb02adde4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lineRenderer: {fileID: 1938188864}
-  _colorLine: {r: 0.12646852, g: 0.9245283, b: 0.33467624, a: 1}
-  _spreadColor: {r: 0.9254902, g: 0.16972712, b: 0.1254902, a: 0.0627451}
-  _normalMaterial: {fileID: 2100000, guid: 68010f9796455834fb2eadf8f794b19f, type: 2}
-  _spreadMaterial: {fileID: 2100000, guid: 037032a83dbe034438ceb64c8d0772fb, type: 2}
-  linePoints: 100
+  linePrefab: {fileID: 6283704377878976339, guid: c1a52f31fb04d174ab075627e3042f93, type: 3}
+  linePoints: 36
   lineStep: 0.01
-  minWidth: 1
-  maxWidth: 30
-  _screenData: {fileID: 0}
+  maxSpreadWidth: 0.06
+  normalColor: {r: 0, g: 0, b: 0, a: 1}
+  spreadColor: {r: 1, g: 0, b: 0, a: 1}
+  screenData: {fileID: 0}
 --- !u!1 &2066467294
 GameObject:
   m_ObjectHideFlags: 0

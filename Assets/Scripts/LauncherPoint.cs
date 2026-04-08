@@ -218,11 +218,26 @@ public class LauncherPoint : MonoBehaviour
         float pullAmount = _dragVector.magnitude;
         float pullRatio = pullAmount / maxDragDistance;
         
-        float launchForce = Mathf.Max(forceMultiplier * pullAmount, 10f);
+        float launchForce = Mathf.Max(forceMultiplier * pullAmount, 6f);
         Vector3 launchVelocity = -_dragVector.normalized * launchForce;
 
         ShotType shotType = (pullRatio >= 0.95f) ? ShotType.PowerShot : ShotType.Normal;
 
+        
+        if (shotType == ShotType.PowerShot)
+        {
+            float spreadAngle = 10f; // градусы
+            float randomOffset = UnityEngine.Random.Range(-spreadAngle, spreadAngle);
+    
+            // Поворачиваем направление на случайный угол
+            float currentAngle = Mathf.Atan2(launchVelocity.y, launchVelocity.x) * Mathf.Rad2Deg;
+            float newAngle = (currentAngle + randomOffset) * Mathf.Deg2Rad;
+    
+            float magnitude = launchVelocity.magnitude;
+            launchVelocity.x = Mathf.Cos(newAngle) * magnitude;
+            launchVelocity.y = Mathf.Sin(newAngle) * magnitude;
+        }
+        
         _ballMover.Launch(launchVelocity, shotType);
         _visualizer?.Hide();
     }

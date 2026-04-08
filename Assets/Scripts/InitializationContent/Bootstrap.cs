@@ -42,7 +42,7 @@ namespace InitializationContent
             
             await _gameManager.Init(_screenData, _gridManager, _ballPool);
             _gameManager.ConnectLauncher(_launcherPoint);
-            _ballLauncher.Initialize(30);
+            _ballLauncher.Initialize(15);
             _ballLauncher.SpawnCurrentBall();
             
             _gameManager.Init(_ballLauncher,_screenData);

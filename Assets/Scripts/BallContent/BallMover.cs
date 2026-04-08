@@ -125,7 +125,10 @@ public class BallMover : MonoBehaviour
     {
         if (_grid == null) return;
     
-        Vector2Int centerCell = _grid.GetCellFromWorldPosition(centerBall.transform.position);
+        // Сохраняем позицию ДО возможного уничтожения
+        Vector3 centerPos = centerBall.transform.position;
+    
+        Vector2Int centerCell = _grid.GetCellFromWorldPosition(centerPos);
     
         // Первый круг - сильно
         List<Vector2Int> firstCircle = _grid.GetNeighbors(centerCell);
@@ -134,14 +137,13 @@ public class BallMover : MonoBehaviour
             GameObject ball = _grid.GetBall(cell);
             if (ball != null)
             {
-                AnimateBounce(ball, 0.25f, 0.08f, centerBall.transform.position);
+                AnimateBounce(ball, 0.25f, 0.08f, centerPos);
             }
         }
     
-        // Ждём когда первый круг начнёт возвращаться
         await UniTask.Delay(80);
     
-        // Второй круг - слабее, с задержкой
+        // Второй круг - слабее
         List<Vector2Int> secondCircle = new List<Vector2Int>();
         foreach (var cell in firstCircle)
         {
@@ -160,7 +162,7 @@ public class BallMover : MonoBehaviour
             GameObject ball = _grid.GetBall(cell);
             if (ball != null)
             {
-                AnimateBounce(ball, 0.13f, 0.06f, centerBall.transform.position);
+                AnimateBounce(ball, 0.13f, 0.06f, centerPos);
             }
         }
     }
