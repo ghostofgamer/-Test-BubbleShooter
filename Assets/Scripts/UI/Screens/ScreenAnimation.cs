@@ -2,8 +2,10 @@ using DG.Tweening;
 using Enums;
 using UnityEngine;
 
-public class ScreenAnimation : MonoBehaviour
+namespace UI.Screens
 {
+    public class ScreenAnimation : MonoBehaviour
+    {
 // @formatter:off        
         [Header("References")]
         [SerializeField] private RectTransform _rect;
@@ -128,4 +130,5 @@ public class ScreenAnimation : MonoBehaviour
             _canvasGroup.blocksRaycasts = value;
             _canvasGroup.interactable = value;
         }
+    }
 }

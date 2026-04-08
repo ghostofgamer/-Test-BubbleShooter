@@ -32,7 +32,9 @@ public class EffectManager : MonoBehaviour
     public void PlayEffect(Vector3 position, Color ballColor)
     {
         BallExplosionEffect effect = GetFreeEffect();
-        if (effect == null) return;
+        
+        if (effect == null)
+            return;
 
         effect.Play(position, ballColor);
     }
@@ -45,6 +47,6 @@ public class EffectManager : MonoBehaviour
                 return effect;
         }
 
-        return null; // или создай новый если нужно
+        return null;
     }
 }

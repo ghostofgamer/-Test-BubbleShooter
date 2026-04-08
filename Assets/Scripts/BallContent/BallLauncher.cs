@@ -52,20 +52,16 @@ namespace BallContent
 
             _launcherPoint.SetBall(_currentBall);
             _ballsUsed++;
-
             UpdateNextPreview();
         }
 
         private void UpdateNextPreview()
         {
             if (_nextBall != null && _nextBall.gameObject.activeSelf)
-            {
                 _nextBallImage.color = _nextBall.GetComponent<SpriteRenderer>().color;
-            }
             else
-            {
                 _nextBallImage.color = Color.clear;
-            }
+            
             _nextBallText.text = RemainingBalls.ToString();
         }
     }

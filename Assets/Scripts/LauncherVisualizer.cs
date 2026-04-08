@@ -6,23 +6,21 @@ public class LauncherVisualizer : MonoBehaviour
 {
     [SerializeField] private LineRenderer linePrefab;
 
-    [Header("Trajectory")] [SerializeField]
-    private int linePoints = 30;
-
+    [Header("Trajectory")]
+    [SerializeField] private int linePoints = 30;
     [SerializeField] private float lineStep = 0.1f;
 
-    [Header("Spread")] [SerializeField] private float maxSpreadWidth = 1.5f;
+    [Header("Spread")] 
+    [SerializeField] private float maxSpreadWidth = 1.5f;
 
-    [Header("Colors")] [SerializeField] private Color normalColor = Color.black;
+    [Header("Colors")] 
+    [SerializeField] private Color normalColor = Color.black;
     [SerializeField] private Color spreadColor = Color.red;
-
     [SerializeField] private ScreenData screenData;
 
     private LineRenderer leftLine;
     private LineRenderer rightLine;
     private LineRenderer centerLine;
-
-    #region PUBLIC
 
     public void Init(ScreenData screen)
     {
@@ -75,46 +73,15 @@ public class LauncherVisualizer : MonoBehaviour
         rightLine.enabled = false;
     }
 
-    #endregion
-
-    #region CORE
-
-    List<Vector3> CalculateCenterTrajectory(
-        Vector3 startPos,
-        Vector3 dir,
-        float force,
-        float radius)
+    private List<Vector3> CalculateCenterTrajectory(Vector3 startPos, Vector3 dir, float force, float radius)
     {
         List<Vector3> points = new();
-
         float left = -screenData.Width / 2f + radius;
         float right = screenData.Width / 2f - radius;
         float top = screenData.Height / 2f - radius;
-
         Vector3 pos = startPos;
         Vector3 vel = dir.normalized * force;
-
-        /*for (int i = 0; i < linePoints; i++)
-        {
-            pos += vel * lineStep;
-
-            // отражение только по X
-            if (pos.x <= left || pos.x >= right)
-            {
-                vel.x = -vel.x;
-                pos.x = Mathf.Clamp(pos.x, left, right);
-            }
-
-            // верхняя граница — остановка траектории
-            if (pos.y >= top)
-            {
-                pos.y = top;
-                points.Add(pos);
-                break; // 🔥 как было в старом коде
-            }
-
-            points.Add(pos);
-        }*/
+        
         for (int i = 0; i < linePoints; i++)
         {
             Vector3 nextPos = pos + vel * lineStep;
@@ -190,11 +157,7 @@ public class LauncherVisualizer : MonoBehaviour
         return result;
     }
     
-    void BuildSpread(
-        List<Vector3> center,
-        float spread,
-        out List<Vector3> left,
-        out List<Vector3> right)
+    private void BuildSpread(List<Vector3> center, float spread, out List<Vector3> left, out List<Vector3> right)
     {
         left = new List<Vector3>();
         right = new List<Vector3>();
@@ -204,7 +167,6 @@ public class LauncherVisualizer : MonoBehaviour
         for (int i = 0; i < center.Count; i++)
         {
             float t = i / (float)center.Count;
-
             Vector3 dir;
 
             if (i == 0)
@@ -219,28 +181,22 @@ public class LauncherVisualizer : MonoBehaviour
             {
                 Vector3 dir1 = (center[i] - center[i - 1]).normalized;
                 Vector3 dir2 = (center[i + 1] - center[i]).normalized;
-
                 dir = (dir1 + dir2).normalized; // 🔥 ключ
             }
-
-            // дополнительное сглаживание
+            
             if (i > 0)
-            {
                 dir = Vector3.Lerp(prevDir, dir, 0.5f).normalized;
-            }
 
             prevDir = dir;
 
             Vector3 normal = new Vector3(-dir.y, dir.x, 0f);
-
             float offset = maxSpreadWidth * spread * t;
-
             left.Add(center[i] + normal * offset);
             right.Add(center[i] - normal * offset);
         }
     }
 
-    void DrawLine(LineRenderer line, List<Vector3> points, Color color)
+    private void DrawLine(LineRenderer line, List<Vector3> points, Color color)
     {
         line.enabled = true;
         line.positionCount = points.Count;
@@ -254,6 +210,4 @@ public class LauncherVisualizer : MonoBehaviour
             line.SetPosition(i, points[i]);
         }
     }
-
-    #endregion
 }

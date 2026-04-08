@@ -1,57 +1,49 @@
 using UnityEngine;
 
-public class BallDrag : MonoBehaviour
+namespace BallContent
 {
-    [SerializeField] private Transform _shootPoint;
-    [SerializeField] private float _maxDragDistance = 2f;
-
-    private Vector2 _startPosition;
-    private bool _isDragging = false;
-
-    void Start()
+    public class BallDrag : MonoBehaviour
     {
-        ResetBall();
-    }
+        [SerializeField] private Transform _shootPoint;
+        [SerializeField] private float _maxDragDistance = 2f;
 
-    void Update()
-    {
-        if (Input.GetMouseButtonDown(0))
+        private Vector2 _startPosition;
+        private bool _isDragging = false;
+
+        private void Start()
         {
-            _isDragging = true;
-        }
-
-        if (Input.GetMouseButton(0) && _isDragging)
-        {
-            DragBall();
-        }
-
-        if (Input.GetMouseButtonUp(0))
-        {
-            _isDragging = false;
-
-            // пока просто отпускаем без выстрела
             ResetBall();
         }
-    }
 
-    void DragBall()
-    {
-        Vector2 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-
-        Vector2 direction = mouseWorld - (Vector2)_shootPoint.position;
-
-        // ограничиваем дистанцию
-        if (direction.magnitude > _maxDragDistance)
+        private void Update()
         {
-            direction = direction.normalized * _maxDragDistance;
+            if (Input.GetMouseButtonDown(0))
+                _isDragging = true;
+
+            if (Input.GetMouseButton(0) && _isDragging)
+                DragBall();
+
+            if (Input.GetMouseButtonUp(0))
+            {
+                _isDragging = false;
+                ResetBall();
+            }
         }
 
-        // тянем В ОБРАТНУЮ сторону (как рогатка)
-        transform.position = _shootPoint.position - (Vector3)direction;
-    }
+        private void DragBall()
+        {
+            Vector2 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Vector2 direction = mouseWorld - (Vector2)_shootPoint.position;
 
-    void ResetBall()
-    {
-        transform.position = _shootPoint.position;
+            if (direction.magnitude > _maxDragDistance)
+                direction = direction.normalized * _maxDragDistance;
+
+            transform.position = _shootPoint.position - (Vector3)direction;
+        }
+
+        private void ResetBall()
+        {
+            transform.position = _shootPoint.position;
+        }
     }
 }

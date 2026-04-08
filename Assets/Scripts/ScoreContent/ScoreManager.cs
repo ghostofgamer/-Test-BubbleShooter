@@ -25,22 +25,14 @@ namespace ScoreContent
         public void AddMatchScore(int ballsCount)
         {
             int points = ballsCount * 10;
-            
+
             if (ballsCount > 3)
-            {
-                points += (ballsCount - 3) * 5; // +5 за каждый шар сверх 3
-            }
+                points += (ballsCount - 3) * 5;
             
-            AddScore(points);
-        }
-        
-        public void AddFallingBallsScore(int ballsCount)
-        {
-            int points = ballsCount * 15; // Чуть больше за упавшие
             AddScore(points);
         }
 
-        public void AddScore(int points)
+        private void AddScore(int points)
         {
             CurrentScore += points;
             UpdateScore();
@@ -51,12 +43,6 @@ namespace ScoreContent
             CurrentScore = 0;
             UpdateScore();
         }
-
-        public void UpdateRecord()
-        {
-            if (CurrentScore > RecordScore)
-                PlayerPrefs.SetInt(RecordScoreName, CurrentScore);
-        }
         
         public bool TrySetNewRecord()
         {
@@ -66,6 +52,7 @@ namespace ScoreContent
                 PlayerPrefs.SetInt(RecordScoreName, RecordScore);
                 return true;
             }
+            
             return false;
         }
 

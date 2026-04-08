@@ -7,22 +7,20 @@ using InitializationContent;
 using ScoreContent;
 using SpawnContent;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
-    [Header("References")] [SerializeField]
-    private GridManager _gridManager;
-
+    [Header("References")] 
+    [SerializeField] private GridManager _gridManager;
     [SerializeField] private BallPool _ballPool;
     [SerializeField] private LauncherPoint _launcherPoint;
+
+    [Header("Game Settings")] 
+    [SerializeField] private int _minBallsForWin = 3;
+
     private BallLauncher _ballLauncher;
-
-    [Header("Game Settings")] [SerializeField]
-    private int _minBallsForWin = 3;
-
     private bool _isGameOver = false;
     private ScreenData _screenData;
 
@@ -47,27 +45,24 @@ public class GameManager : MonoBehaviour
         await UniTask.Delay(500);
     }
 
-    public void SpawnNextBall()
+    private void SpawnNextBall()
     {
         if (_isGameOver) return;
         _ballLauncher?.SpawnCurrentBall();
     }
 
-    public void OnBallPlaced(Ball ball)
+    private void OnBallPlaced(Ball ball)
     {
         Vector2Int cell = _gridManager.GetCellFromWorldPosition(ball.transform.position);
         _gridManager.AddBall(cell, ball.gameObject);
-
         CheckMatches(ball, cell);
     }
 
-    public void OnBallShotThrough(Ball ball, Vector2Int targetCell)
+    private void OnBallShotThrough(Ball ball, Vector2Int targetCell)
     {
         _gridManager.RemoveBall(targetCell);
         _gridManager.AddBall(targetCell, ball.gameObject);
-
         ball.transform.position = _gridManager.GetWorldPosition(targetCell.x, targetCell.y);
-
         CheckWinCondition();
         Invoke("SpawnNextBallDelayed", 0.3f);
     }
@@ -75,12 +70,8 @@ public class GameManager : MonoBehaviour
     private void CheckMatches(Ball ball, Vector2Int cell)
     {
         string ballType = ball.GetBallType();
-        Color ballColor = ball.GetComponent<SpriteRenderer>().color;
-
-        // Найти все шары того же цвета connected к этому
         List<Vector2Int> matchingCells = FindConnectedBalls(cell, ballType);
-
-        // Если 3+ шара одного цвета - уничтожить
+        
         if (matchingCells.Count >= 3)
         {
             foreach (var matchCell in matchingCells)
@@ -97,11 +88,7 @@ public class GameManager : MonoBehaviour
             }
 
             ScoreManager.Instance.AddMatchScore(matchingCells.Count);
-
-            // Удалить висячие шары
             RemoveFloatingBalls();
-
-            // Проверить победу
             CheckWinCondition();
         }
 
@@ -133,6 +120,7 @@ public class GameManager : MonoBehaviour
                     if (neighborBall != null)
                     {
                         Ball ballComponent = neighborBall.GetComponent<Ball>();
+                        
                         if (ballComponent != null && ballComponent.GetBallType() == ballType)
                         {
                             visited.Add(neighbor);
@@ -146,31 +134,6 @@ public class GameManager : MonoBehaviour
         return visited;
     }
 
-    /*private void RemoveFloatingBalls()
-    {
-        int floatingBallsCount = 0;
-        List<Vector2Int> connectedToCeiling = GetBallsConnectedToCeiling();
-        List<Vector2Int> allBalls = _gridManager.GetAllOccupiedCells();
-
-        foreach (var cell in allBalls)
-        {
-            if (!connectedToCeiling.Contains(cell))
-            {
-                GameObject ballObj = _gridManager.GetBall(cell);
-
-                if (ballObj != null)
-                {
-                    Debug.Log("УдалЯем висящий шар ");
-                    floatingBallsCount++;
-                    _gridManager.RemoveBall(cell);
-                    DestroyBall(ballObj);
-                }
-            }
-        }
-
-        ScoreManager.Instance.AddFallingBallsScore(floatingBallsCount);
-    }*/
-
     private void RemoveFloatingBalls()
     {
         List<Vector2Int> connectedToCeiling = GetBallsConnectedToCeiling();
@@ -181,14 +144,11 @@ public class GameManager : MonoBehaviour
             if (!connectedToCeiling.Contains(cell))
             {
                 GameObject ballObj = _gridManager.GetBall(cell);
+                
                 if (ballObj != null)
                 {
                     _gridManager.RemoveBall(cell,false);
-
-                    // Получаем цвет для эффекта
                     Color ballColor = ballObj.GetComponent<SpriteRenderer>().color;
-
-                    // Анимируем падение
                     AnimateFallingBall(ballObj, ballColor);
                 }
             }
@@ -197,19 +157,13 @@ public class GameManager : MonoBehaviour
 
     private void AnimateFallingBall(GameObject ball, Color ballColor)
     {
-        // Позиция внизу экрана + оффсет вверх
         Vector3 targetPos = new Vector3(ball.transform.position.x, _screenData.Bottom + 1f, ball.transform.position.z);
-
         float fallTime = Vector3.Distance(ball.transform.position, targetPos) / 8f;
 
         ball.transform.DOMove(targetPos, fallTime).SetEase(Ease.InQuad).OnComplete(() =>
         {
             Debug.Log("Falling Effect Bum");
-        
-            // Эффект чуть выше низа экрана
             EffectManager.Instance.PlayEffect(targetPos, ballColor);
-
-            // Возвращаем в пул
             DestroyBall(ball);
         });
     }
@@ -221,10 +175,9 @@ public class GameManager : MonoBehaviour
         for (int x = 0; x < _gridManager.Cols; x++)
         {
             Vector2Int cell = new Vector2Int(x, 0);
+            
             if (_gridManager.IsCellOccupied(cell))
-            {
                 BFSConnectivity(cell, connected);
-            }
         }
 
         return connected;
@@ -234,7 +187,6 @@ public class GameManager : MonoBehaviour
     {
         Queue<Vector2Int> queue = new();
         HashSet<Vector2Int> visited = new();
-
         queue.Enqueue(start);
         visited.Add(start);
         connected.Add(start);
@@ -263,9 +215,7 @@ public class GameManager : MonoBehaviour
             Ball ballComponent = ball.GetComponent<Ball>();
 
             if (ballComponent != null)
-            {
                 _ballPool.Release(ballComponent);
-            }
         }
     }
 
@@ -280,16 +230,13 @@ public class GameManager : MonoBehaviour
         }
 
         if (IsLastRowNearlyEmpty())
-        {
             Victory();
-        }
     }
 
     private bool IsLastRowNearlyEmpty()
     {
         int maxRow = _gridManager.GetMaxRowWithBalls();
         if (maxRow < 0) return false;
-
         int ballsInLastRow = 0;
 
         for (int x = 0; x < _gridManager.Cols; x++)
@@ -298,19 +245,19 @@ public class GameManager : MonoBehaviour
                 ballsInLastRow++;
         }
 
-
         int maxPossibleInRow = _gridManager.Cols;
         float percentage = (float)ballsInLastRow / maxPossibleInRow;
-
         return percentage < 0.3f;
     }
 
     private void Victory()
     {
         List<Vector2Int> remaining = _gridManager.GetAllOccupiedCells();
+        
         foreach (var cell in remaining)
         {
             GameObject ballObj = _gridManager.GetBall(cell);
+            
             if (ballObj != null)
             {
                 _gridManager.RemoveBall(cell);
@@ -321,7 +268,6 @@ public class GameManager : MonoBehaviour
         _gridManager.ClearAll();
         _isGameOver = true;
         VictoryGame?.Invoke();
-        Debug.Log("WIN!");
     }
 
     public void ConnectLauncher(LauncherPoint launcher)

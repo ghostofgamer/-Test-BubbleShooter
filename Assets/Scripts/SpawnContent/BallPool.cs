@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using BallContent;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -27,13 +28,10 @@ namespace SpawnContent
             }
         
             _ballSpriteSize = _ballPrefab.GetComponent<SpriteRenderer>().bounds.size.x;
-        
             _pool = new List<Ball>();
         
             for (int i = 0; i < _initialCount; i++)
-            {
                 CreateBall();
-            }
         }
 
         public void SetBallColorConfig(SOContent.BallColorConfig config)
@@ -50,19 +48,14 @@ namespace SpawnContent
             ball.InitRadius(_radius);
         
             if (_ballColorConfig != null)
-            {
                 ball.SetBallColorConfig(_ballColorConfig);
-            }
         
             string randomType = _ballTypes[Random.Range(0, _ballTypes.Length)];
             ball.Init(randomType);
-        
             ball.gameObject.SetActive(false);
         
             for (int i = _pool.Count - 1; i >= 0; i--)
-            {
                 if (_pool[i] == null) _pool.RemoveAt(i);
-            }
         
             _pool.Add(ball);
             return ball;

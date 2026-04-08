@@ -13,7 +13,6 @@ public class PlayFieldSpawner : MonoBehaviour
     [Header("Sizes")] [SerializeField] private float _wallThickness = 0.5f;
     [SerializeField] private float _ceilingThickness = 0.3f;
     [SerializeField] private float _floorThickness = 0.5f;
-    [SerializeField] private BubbleFieldGenerator _bubbleFieldGenerator;
     
     private Vector3 CamPos => _camera.transform.position;
 
@@ -30,9 +29,6 @@ public class PlayFieldSpawner : MonoBehaviour
         Transform rightWall = SpawnWall("RightWall",
             new Vector3(CamPos.x + (camWidth / 2f - _wallThickness / 2f), CamPos.y, 0),
             new Vector3(_wallThickness, camHeight, 1f));
-        
-        /*if (_bubbleFieldGenerator != null)
-            _bubbleFieldGenerator.Init(leftWall, rightWall, ceiling);*/
     }
 
     private void SpawnBackground(float camHeight, float camWidth)
@@ -51,23 +47,10 @@ public class PlayFieldSpawner : MonoBehaviour
         obj.transform.position = position;
         obj.transform.localScale = scale;
         obj.transform.SetParent(_container, true);
-
-        // Дочка со спрайтом остается с localScale = 1
+        
         if (obj.transform.childCount > 0)
             obj.transform.GetChild(0).localScale = Vector3.one;
 
-        // SetCollider(obj, new Vector2(scale.x, scale.y));
-
         return obj.transform;
-    }
-
-    private void SetCollider(GameObject obj, Vector2 size)
-    {
-        BoxCollider2D bc = obj.GetComponent<BoxCollider2D>();
-        if (bc != null)
-        {
-            bc.size = size;
-            bc.offset = Vector2.zero;
-        }
     }
 }

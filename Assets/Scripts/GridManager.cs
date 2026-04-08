@@ -1,38 +1,33 @@
 using System;
 using System.Collections.Generic;
+using BallContent;
 using Cysharp.Threading.Tasks;
 using InitializationContent;
 using SpawnContent;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class GridManager : MonoBehaviour
 {
-    public GameObject ballPrefab;
-
-    private Dictionary<Vector2Int, GameObject> grid = new();
-    public int cols = 8;
-    public int rows;
-    public int Cols => cols;
-    public int Rows => rows;
+    [SerializeField]private int cols = 8;
+    [SerializeField]private int rows;
     [SerializeField] private float _offset;
-
-    public TextAsset levelFile;
+    [SerializeField]private TextAsset levelFile;
 
     private float width;
     private float height;
     private float _top;
     public event Action GridCompleted;
     private BallPool _ballPool;
+    private Dictionary<Vector2Int, GameObject> grid = new();
 
+    public int Cols => cols;
+    public int Rows => rows;
     public float Radius { get; private set; } = 0.5f;
 
     public async UniTask Init(ScreenData screen, BallPool pool)
     {
         _ballPool = pool;
-        // CalculateGridSize(screen.Width, screen.Height);
         _top = screen.Top;
-
         LoadLevel();
     }
 
@@ -40,41 +35,28 @@ public class GridManager : MonoBehaviour
     {
         float padding = 0.9f;
         Radius = (screenWidth * padding) / (cols * 2f);
-
         width = Radius * 2;
         height = Mathf.Sqrt(3) * Radius;
-
         rows = Mathf.FloorToInt(screenHeight / height);
     }
 
     public Vector2 GetWorldPosition(int x, int y)
     {
         float offsetX = (y % 2 == 0) ? 0 : Radius;
-
         float totalWidth = cols * width + Radius;
         float worldX = x * width + offsetX - totalWidth / 2f + width / 2f;
-
-        // верхняя граница камеры
         float top = _top;
-
-        // первый ряд ниже верхней границы на радиус + дополнительный оффсет
         float firstRowY = top - Radius - _offset;
-
         float worldY = firstRowY - y * height;
-
         return new Vector2(worldX, worldY);
     }
 
-    void LoadLevel()
+    private void LoadLevel()
     {
         if (levelFile == null || string.IsNullOrEmpty(levelFile.text))
-        {
-            Debug.LogWarning("Level file not found or empty!");
             return;
-        }
 
         string[] lines = levelFile.text.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-
         rows = Mathf.Max(rows, lines.Length);
         cols = Mathf.Max(cols, lines.Length > 0 ? lines[0].Trim().Length : 0);
 
@@ -87,44 +69,32 @@ public class GridManager : MonoBehaviour
                 char c = line[x];
 
                 if (c == '-' || c == '.' || c == ' ')
-                {
                     continue;
-                }
 
                 SpawnBall(x, y, c.ToString());
             }
         }
     }
 
-    void SpawnBall(int x, int y, string type)
+    private void SpawnBall(int x, int y, string type)
     {
         Vector2 pos = GetWorldPosition(x, y);
-
         Ball ballObj = _ballPool.Get();
         ballObj.transform.position = pos;
-
-        /*// масштабируем по radius
-        float spriteSize = ballObj.GetSpriteSize();
-        ballObj.transform.localScale = Vector3.one * (Radius * 2f / spriteSize);*/
-
         ballObj.Init(type);
-
         grid[new Vector2Int(x, y)] = ballObj.gameObject;
     }
-
-    // ❓ проверка занятости
+    
     public bool IsCellOccupied(Vector2Int pos)
     {
         return grid.ContainsKey(pos);
     }
-
-    // ➕ добавление шара
+    
     public void AddBall(Vector2Int pos, GameObject ball)
     {
         grid[pos] = ball;
     }
-
-    // ❌ удаление
+    
     public void RemoveBall(Vector2Int pos, bool isDestroy = true)
     {
         if (grid.ContainsKey(pos))
@@ -132,9 +102,7 @@ public class GridManager : MonoBehaviour
             GameObject ball = grid[pos];
 
             if (ball != null && isDestroy)
-            {
                 Destroy(ball);
-            }
 
             grid.Remove(pos);
         }
@@ -153,9 +121,9 @@ public class GridManager : MonoBehaviour
                 Vector2Int key = new Vector2Int(x, y);
 
                 if (grid.ContainsKey(key))
-                    Gizmos.color = Color.green; // занято
+                    Gizmos.color = Color.green; 
                 else
-                    Gizmos.color = Color.red; // пусто
+                    Gizmos.color = Color.red;
 
                 Gizmos.DrawWireSphere(pos, Radius * 0.9f);
             }
@@ -192,9 +160,7 @@ public class GridManager : MonoBehaviour
         for (int y = 0; y < rows; y++)
         {
             for (int x = 0; x < cols; x++)
-            {
                 cells.Add(new Vector2Int(x, y));
-            }
         }
 
         return cells;
@@ -219,14 +185,6 @@ public class GridManager : MonoBehaviour
     {
         List<Vector2Int> neighbors = new();
         int y = cell.y;
-
-        int[] evenRowOffsets =
-        {
-            new Vector2Int(-1, 0).x, new Vector2Int(1, 0).x,
-            new Vector2Int(0, -1).x, new Vector2Int(0, 1).x,
-            new Vector2Int(-1, -1).x, new Vector2Int(-1, 1).x
-        };
-        int[] evenRowOffsetsY = { 0, 0, -1, 1, -1, 1 };
 
         if (y % 2 == 0)
         {
@@ -260,6 +218,7 @@ public class GridManager : MonoBehaviour
         {
             Vector2 cellWorldPos = GetWorldPosition(cell.x, cell.y);
             float dist = Vector2.Distance(worldPos, cellWorldPos);
+            
             if (dist < minDist)
             {
                 minDist = dist;
@@ -273,9 +232,7 @@ public class GridManager : MonoBehaviour
     public void ClearAll()
     {
         foreach (var kvp in grid)
-        {
             if (kvp.Value != null) Destroy(kvp.Value);
-        }
 
         grid.Clear();
     }

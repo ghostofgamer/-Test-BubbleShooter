@@ -15,14 +15,14 @@ namespace SOContent
                     return bc.Color;
             }
             
-            return Color.white; // по умолчанию
+            return Color.white;
         }
     }
     
     [System.Serializable]
     public struct BallColor
     {
-        public string Type;    // буква из файла, например "R"
-        public Color Color;    // цвет шарика
+        public string Type;
+        public Color Color; 
     }
 }

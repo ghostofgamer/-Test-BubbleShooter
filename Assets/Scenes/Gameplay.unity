@@ -200,7 +200,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1081320880}
-  m_RootOrder: 10
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &45450482
 MonoBehaviour:
@@ -365,11 +365,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a9a386ad60c7884a9a52e9a676a8c8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _ballsCount: 30
   _camera: {fileID: 685316143}
   _playFieldSpawner: {fileID: 1478161880}
   _gridManager: {fileID: 833707900}
   _ballPool: {fileID: 3839691}
-  _ballQueue: {fileID: 1775320680}
   _launcherVisualizer: {fileID: 1938188866}
   _launcherPoint: {fileID: 1938188865}
   _gameManager: {fileID: 1529165250}
@@ -506,10 +506,10 @@ RectTransform:
   m_Father: {fileID: 909306184}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 1, y: 0}
-  m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -195.81964, y: 85}
-  m_SizeDelta: {x: 391.6393, y: 133.60858}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 209, y: 294}
+  m_SizeDelta: {x: 391.63928, y: 133.60858}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &403708400
 MonoBehaviour:
@@ -918,7 +918,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1081320880}
-  m_RootOrder: 9
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &642963941
 MonoBehaviour:
@@ -1208,7 +1208,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1081320880}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &833707900
 MonoBehaviour:
@@ -1222,7 +1222,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d415df710902e7f41be26070d726030a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ballPrefab: {fileID: 398233308456129356, guid: e34ff96bf228af94ba8f0093ac3271a9, type: 3}
   cols: 6
   rows: 30
   _offset: 0.01
@@ -1263,9 +1262,9 @@ RectTransform:
   m_Father: {fileID: 909306184}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 161.30005, y: -69.1001}
+  m_AnchorMin: {x: 1, y: 0}
+  m_AnchorMax: {x: 1, y: 0}
+  m_AnchoredPosition: {x: -191, y: 74.9}
   m_SizeDelta: {x: 300, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &907480843
@@ -1498,7 +1497,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1081320880}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &930875077
 MonoBehaviour:
@@ -1512,9 +1511,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: af5f213e45bfe894eb66c6b55bbae854, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _ballPrefabs: {fileID: 2346116951813844868, guid: e34ff96bf228af94ba8f0093ac3271a9, type: 3}
-  _container: {fileID: 1350313989}
-  _spawnInterval: 3
 --- !u!1 &998843000
 GameObject:
   m_ObjectHideFlags: 0
@@ -1545,7 +1541,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1081320880}
-  m_RootOrder: 8
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &998843002
 MonoBehaviour:
@@ -1560,57 +1556,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _scoreCurrentText: {fileID: 485021885}
---- !u!1 &1023039291
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1023039292}
-  - component: {fileID: 1023039293}
-  m_Layer: 0
-  m_Name: BubbleGenerator
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &1023039292
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1023039291}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1081320880}
-  m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1023039293
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1023039291}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8382bd37c4d8450419826df1ae169f10, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BubbleFieldGenerator
-  bubblePrefab: {fileID: 8003262060785728175, guid: e76a982652e3e6043b56a5c7a2adbcb1, type: 3}
-  _spawnOffsetX: 0.15
-  _spawnOffsetY: 0.15
-  _leftWall: {fileID: 0}
-  _rightWall: {fileID: 0}
-  _ceiling: {fileID: 0}
-  levelFile: {fileID: 4900000, guid: d6499b86522723d499cde4b42a8f8d6e, type: 3}
 --- !u!1 &1081320879
 GameObject:
   m_ObjectHideFlags: 0
@@ -1640,7 +1585,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 319304952}
-  - {fileID: 1023039292}
   - {fileID: 1478161879}
   - {fileID: 833707899}
   - {fileID: 930875076}
@@ -1683,7 +1627,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1081320880}
-  m_RootOrder: 7
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1280108856
 MonoBehaviour:
@@ -1730,7 +1674,7 @@ Transform:
   - {fileID: 3839690}
   - {fileID: 1775320679}
   m_Father: {fileID: 1081320880}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1350313988
 GameObject:
@@ -1793,7 +1737,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1081320880}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1478161880
 MonoBehaviour:
@@ -1815,7 +1759,6 @@ MonoBehaviour:
   _wallThickness: 0.03
   _ceilingThickness: 0.015
   _floorThickness: 0.5
-  _bubbleFieldGenerator: {fileID: 1023039293}
 --- !u!1 &1529165248
 GameObject:
   m_ObjectHideFlags: 0
@@ -1846,7 +1789,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1081320880}
-  m_RootOrder: 6
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1529165250
 MonoBehaviour:
@@ -2216,9 +2159,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06eab3d376c839040abdc0a3c0711eac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _spawnPoint: {fileID: 1938188863}
-  _ballPool: {fileID: 3839691}
-  _radius: 0.5
 --- !u!1 &1938188862
 GameObject:
   m_ObjectHideFlags: 0
@@ -2377,11 +2317,11 @@ MonoBehaviour:
   maxDragDistance: 1
   forceMultiplier: 30
   minForceMultiplier: 5
-  gravity: 9.8
   _ballPool: {fileID: 3839691}
   ballHolder: {fileID: 339875677}
   _gridManager: {fileID: 833707900}
   _powerText: {fileID: 403708400}
+  _spreadAngle: 6
   _minAngle: 30
   _maxAngle: 150
 --- !u!114 &1938188866
@@ -2400,8 +2340,8 @@ MonoBehaviour:
   linePoints: 36
   lineStep: 0.01
   maxSpreadWidth: 0.06
-  normalColor: {r: 0, g: 0, b: 0, a: 1}
-  spreadColor: {r: 1, g: 0, b: 0, a: 1}
+  normalColor: {r: 0.16420436, g: 0.7735849, b: 0.26454538, a: 1}
+  spreadColor: {r: 0.77254903, g: 0.16470587, b: 0.17036736, a: 1}
   screenData: {fileID: 0}
 --- !u!1 &2066467294
 GameObject:
@@ -2451,6 +2391,10 @@ PrefabInstance:
     - target: {fileID: 6014772957050592584, guid: 804a604e61095374bac57ad7674ef1d6, type: 3}
       propertyPath: m_text
       value: Record:---
+      objectReference: {fileID: 0}
+    - target: {fileID: 7648854211717039156, guid: 804a604e61095374bac57ad7674ef1d6, type: 3}
+      propertyPath: m_Color.a
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7648854211959137455, guid: 804a604e61095374bac57ad7674ef1d6, type: 3}
       propertyPath: m_Name

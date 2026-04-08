@@ -1,41 +1,10 @@
 using System;
-using System.Linq;
+using BallContent;
 using InitializationContent;
 using SpawnContent;
 using UnityEngine;
 using TMPro;
 
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
-
-[System.AttributeUsage(AttributeTargets.Method)]
-public class EditorButtonAttribute : PropertyAttribute { }
-
-#if UNITY_EDITOR
-[CustomEditor(typeof(MonoBehaviour), true)]
-public class EditorButton : Editor
-{
-    public override void OnInspectorGUI()
-    {
-        base.OnInspectorGUI();
-
-        var mono = target as MonoBehaviour;
-
-        var methods = mono.GetType()
-            .GetMethods(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic)
-            .Where(m => m.GetCustomAttributes(typeof(EditorButtonAttribute), true).Length > 0);
-
-        foreach (var method in methods)
-        {
-            if (GUILayout.Button(method.Name))
-            {
-                method.Invoke(mono, null);
-            }
-        }
-    }
-}
-#endif
 
 public class LauncherPoint : MonoBehaviour
 {
@@ -43,25 +12,21 @@ public class LauncherPoint : MonoBehaviour
     [SerializeField] private float maxDragDistance = 2f;
     [SerializeField] private float forceMultiplier = 10f;
     [SerializeField] private float minForceMultiplier = 5f;
-    [SerializeField] private float gravity = 9.8f;
-
     [SerializeField] private BallPool _ballPool;
     [SerializeField] private Transform ballHolder;
     [SerializeField] private GridManager _gridManager;
     [SerializeField] private TMP_Text _powerText;
+    [SerializeField] private float _spreadAngle = 6;
+    [SerializeField] private float _minAngle = 45f;
+    [SerializeField] private float _maxAngle = 135f;
 
     private Ball _currentBall;
     private BallMover _ballMover;
     private Vector3 _startPosition;
     private Vector3 _dragVector;
     private bool _isDragging = false;
-
-    [SerializeField] private float _minAngle = 45f;
-    [SerializeField] private float _maxAngle = 135f;
-
     private LauncherVisualizer _visualizer;
     private ScreenData _screenData;
-
     private bool _isFlying = false;
 
     public event Action<Ball, Vector2Int> OnBallPlaced;
@@ -74,26 +39,16 @@ public class LauncherPoint : MonoBehaviour
         _screenData = screenData;
     }
 
-    [EditorButton]
-    public void GetNewBallTest()
-    {
-        SetBall(_ballPool.Get());
-    }
-
     public void SetBall(Ball ball)
     {
         _currentBall = ball;
         _currentBall.transform.position = _startPosition;
         _currentBall.transform.SetParent(ballHolder, true);
-        
         _ballMover = _currentBall.GetComponent<BallMover>();
         _ballMover.Init(_screenData, _gridManager);
-        _ballMover.gravity = gravity;
         _ballMover.Stop();
-        
         _ballMover.OnBallPlaced += OnBallPlacedHandler;
         _ballMover.OnBallShotThrough += OnBallShotThroughHandler;
-        
         _isFlying = false;
         _isDragging = false;
         _visualizer?.Hide();
@@ -106,6 +61,7 @@ public class LauncherPoint : MonoBehaviour
             _ballMover.OnBallPlaced -= OnBallPlacedHandler;
             _ballMover.OnBallShotThrough -= OnBallShotThroughHandler;
         }
+
         _isFlying = false;
         _isDragging = false;
         OnBallPlaced?.Invoke(ball, cell);
@@ -118,6 +74,7 @@ public class LauncherPoint : MonoBehaviour
             _ballMover.OnBallPlaced -= OnBallPlacedHandler;
             _ballMover.OnBallShotThrough -= OnBallShotThroughHandler;
         }
+
         _isFlying = false;
         _isDragging = false;
         OnBallShotThrough?.Invoke(ball, cell);
@@ -125,125 +82,94 @@ public class LauncherPoint : MonoBehaviour
 
     private void Update()
     {
-        // Зажимаем и тянем
         if (Input.GetMouseButtonDown(0) && _currentBall != null && !_isFlying)
-        {
             _isDragging = true;
-        }
-    
+
         if (Input.GetMouseButtonUp(0) && _isDragging)
-        {
             LaunchBall();
-        }
-    
+
         if (_isDragging && _currentBall != null && !_isFlying)
             DragBall();
     }
 
     private void DragBall()
     {
-            Vector3 mousePos = Camera.main.ScreenToWorldPoint(
-                new Vector3(Input.mousePosition.x, Input.mousePosition.y, Mathf.Abs(Camera.main.transform.position.z))
-            );
-            mousePos.z = 0f;
+        Vector3 mousePos = Camera.main.ScreenToWorldPoint(
+            new Vector3(Input.mousePosition.x, Input.mousePosition.y, Mathf.Abs(Camera.main.transform.position.z)));
+        
+        mousePos.z = 0f;
+        _dragVector = mousePos - _startPosition;
 
-            _dragVector = mousePos - _startPosition;
-            
-            if (_dragVector.magnitude > maxDragDistance)
-                _dragVector = _dragVector.normalized * maxDragDistance;
+        if (_dragVector.magnitude > maxDragDistance)
+            _dragVector = _dragVector.normalized * maxDragDistance;
 
-            // Разрешаем любое направление вниз
-            // _currentBall.transform.position = _startPosition + _dragVector;
-            
-            
-            Vector3 launchVector = -_dragVector;
+        Vector3 launchVector = -_dragVector;
 
-            if (launchVector.y <= 0)
-            {
-                launchVector.y = 0.01f;
-                launchVector = launchVector.normalized * _dragVector.magnitude;
-                _dragVector = -launchVector;
-            }
-
-            float angle = Mathf.Atan2(launchVector.y, launchVector.x) * Mathf.Rad2Deg;
-            angle = Mathf.Clamp(angle, _minAngle, _maxAngle);
-
-            float length = launchVector.magnitude;
-            launchVector.x = Mathf.Cos(angle * Mathf.Deg2Rad) * length;
-            launchVector.y = Mathf.Sin(angle * Mathf.Deg2Rad) * length;
-
+        if (launchVector.y <= 0)
+        {
+            launchVector.y = 0.01f;
+            launchVector = launchVector.normalized * _dragVector.magnitude;
             _dragVector = -launchVector;
-            _currentBall.transform.position = _startPosition + _dragVector;
+        }
 
-            float pullAmount = _dragVector.magnitude;
-            float pullRatio = pullAmount / maxDragDistance;
-        
-            if (_powerText != null)
-            {
-                int percent = Mathf.RoundToInt(pullRatio * 100);
-                _powerText.text = $"{percent}%";
-            }
-        
-            float currentForce = Mathf.Lerp(minForceMultiplier * pullAmount, forceMultiplier * pullAmount, pullRatio);
+        float angle = Mathf.Atan2(launchVector.y, launchVector.x) * Mathf.Rad2Deg;
+        angle = Mathf.Clamp(angle, _minAngle, _maxAngle);
+        float length = launchVector.magnitude;
+        launchVector.x = Mathf.Cos(angle * Mathf.Deg2Rad) * length;
+        launchVector.y = Mathf.Sin(angle * Mathf.Deg2Rad) * length;
+        _dragVector = -launchVector;
+        _currentBall.transform.position = _startPosition + _dragVector;
+        float pullAmount = _dragVector.magnitude;
+        float pullRatio = pullAmount / maxDragDistance;
 
-            ShotType shotType = ShotType.Normal;
-            float spread = 0f;
+        if (_powerText != null)
+        {
+            int percent = Mathf.RoundToInt(pullRatio * 100);
+            _powerText.text = $"{percent}%";
+        }
 
-            if (pullRatio >= 0.95f)
-            {
-                shotType = ShotType.PowerShot;
-                spread = 15f * pullRatio;
-            }
+        float currentForce = Mathf.Lerp(minForceMultiplier * pullAmount, forceMultiplier * pullAmount, pullRatio);
+        ShotType shotType = ShotType.Normal;
+        float spread = 0f;
 
-            _visualizer?.UpdateTrajectory(
-                _currentBall.transform.position,
-                launchVector.normalized,
-                currentForce,
-                _currentBall.Radius,
-                spread,
-                shotType == ShotType.PowerShot);
+        if (pullRatio >= 0.95f)
+        {
+            shotType = ShotType.PowerShot;
+            spread = 15f * pullRatio;
+        }
 
+        _visualizer?.UpdateTrajectory(_currentBall.transform.position, launchVector.normalized, currentForce,
+            _currentBall.Radius, spread, shotType == ShotType.PowerShot);
     }
 
     private void LaunchBall()
     {
         _isDragging = false;
         _isFlying = true;
-        
+
         if (_powerText != null)
             _powerText.text = "";
-            
-        _currentBall.transform.SetParent(null, true);
 
+        _currentBall.transform.SetParent(null, true);
         float pullAmount = _dragVector.magnitude;
         float pullRatio = pullAmount / maxDragDistance;
-        
-        float launchForce = Mathf.Max(forceMultiplier * pullAmount, 6f);
+        float launchForce = Mathf.Max(forceMultiplier * pullAmount, 5f);
         Vector3 launchVelocity = -_dragVector.normalized * launchForce;
-
         ShotType shotType = (pullRatio >= 0.95f) ? ShotType.PowerShot : ShotType.Normal;
 
-        
+
         if (shotType == ShotType.PowerShot)
         {
-            float spreadAngle = 10f; // градусы
-            float randomOffset = UnityEngine.Random.Range(-spreadAngle, spreadAngle);
-    
-            // Поворачиваем направление на случайный угол
+            float randomOffset = UnityEngine.Random.Range(-_spreadAngle, _spreadAngle);
             float currentAngle = Mathf.Atan2(launchVelocity.y, launchVelocity.x) * Mathf.Rad2Deg;
             float newAngle = (currentAngle + randomOffset) * Mathf.Deg2Rad;
-    
+
             float magnitude = launchVelocity.magnitude;
             launchVelocity.x = Mathf.Cos(newAngle) * magnitude;
             launchVelocity.y = Mathf.Sin(newAngle) * magnitude;
         }
-        
+
         _ballMover.Launch(launchVelocity, shotType);
         _visualizer?.Hide();
-    }
-
-    public void SetFlyingState(bool isFlying)
-    {
-        _isFlying = isFlying;
     }
 }
